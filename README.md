@@ -123,4 +123,4 @@ AC_OUTPUT
 12. RETURN_TRUE	返回true
 
 ### 1. 简单分析一个返回值的宏展开式
-`RETURN_LONG` ->   `{ RETVAL_LONG(l); return; }`  ->   `ZVAL_LONG(return_value, l)`  ->  ......  -> `(zval).u1.type_info   &&7   `
+`RETURN_LONG` ->   `{ RETVAL_LONG(l); return; }`  ->   `ZVAL_LONG(return_value, l)`  ->  ......  -> `(zval).u1.type_info`
