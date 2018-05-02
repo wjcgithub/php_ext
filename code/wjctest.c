@@ -125,6 +125,55 @@ PHP_FUNCTION(get_size)
 	RETURN_STR(result);
 }
 
+//PHP7扩展开发之创建变量
+PHP_FUNCTION(define_var)
+{
+	//变量的值
+	zval var_value;
+	//变量名称
+	zend_string *var_name = NULL;
+
+	//创建整形变量
+	ZVAL_LONG(&var_value, 2);
+	//设置本地变量
+	zend_set_local_var_str("lng", 3, &var_value, 0);
+	ZVAL_NULL(&var_value);
+
+	//创建字符串变量
+	zend_string *str = NULL;
+	char content[4] = "abc";
+	var_name = zend_string_init("str", 3, 0);
+	str = zend_string_init(content, sizeof(content)-1, 0);
+	//设置变量值
+	ZVAL_STR(&var_value, str);
+	//设置本地变量
+	zend_set_local_var(var_name, &var_value, 0);
+	//清除变量
+	zend_string_release(var_name);
+	ZVAL_NULL(&var_value);
+
+	//创建数组变量
+	//设置变量名称
+	var_name = zend_string_init("arr", 3, 0);
+	array_init(&var_value);
+	add_index_long(&var_value, 0, 1);
+	add_assoc_stringl_ex(&var_value, "a", 1, "b", 1);
+	zend_set_local_var(var_name, &var_value, 0);
+	zend_string_release(var_name);
+	ZVAL_NULL(&var_value);
+
+	//创建对象变量
+	zend_class_entry *ce;
+	zend_string *class_name;
+	class_name = zend_string_init("demo", 4, 0);
+	//获取类
+	ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_AUTO);
+	zend_string_release(class_name);
+	object_init_ex(&var_value, ce);
+	//设置本地变量
+	zend_set_local_var_str("obj", 3, &var_value, 0);
+	ZVAL_NULL(&var_value);
+}
 
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and
@@ -210,6 +259,7 @@ const zend_function_entry wjctest_functions[] = {
 	PHP_FE(wjctest, NULL)
 	PHP_FE(default_value, NULL)
 	PHP_FE(get_size, NULL)
+	PHP_FE(define_var, NULL)
 	// #define ZEND_FE(name, arg_info)						ZEND_FENTRY(name, ZEND_FN(name), arg_info, 0)
 	// #define ZEND_FENTRY(zend_name, name, arg_info, flags)	{ #zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_internal_arg_info)-1), flags },
 	// #define ZEND_FN(name) zif_##name
