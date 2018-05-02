@@ -86,7 +86,7 @@ AC_OUTPUT
 5. (5)automake:	将Makefile.am中定义的结构建立Makefile.in,然后configure脚本将生成的Makefile.in文件转换为Makefile。
 
 > 各步骤之间的转化关系如下图:
-![Alt text](./1524571113965.png)
+![Alt text](./img/php_ext.png)
 
 #### 3. 编写扩展的基本步骤
 1. 通过ext目录下ext_skel脚本生成扩展的基本框架: ./ext_skel	--extname ;
