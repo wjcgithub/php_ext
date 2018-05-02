@@ -100,6 +100,32 @@ PHP_FUNCTION(default_value)
 	RETURN_NULL();
 }
 
+//PHP7扩展开发之类型处理
+PHP_FUNCTION(get_size)
+{
+	zval *val;
+	size_t size;
+	zend_string *result;
+	HashTable *myht;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &val))
+	{
+		return;
+	}
+
+	if (Z_TYPE_P(val) == IS_STRING) {
+	    result = strpprintf(0, "string size is %d", Z_STRLEN_P(val));
+	} else if (Z_TYPE_P(val) == IS_ARRAY) {
+	    myht = Z_ARRVAL_P(val);
+	    result = strpprintf(0, "array size is %d", zend_array_count(myht));
+	} else {
+	    result = strpprintf(0, "can not support");
+	}   
+	     
+	RETURN_STR(result);
+}
+
+
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and
    unfold functions in source code. See the corresponding marks just before
@@ -183,7 +209,7 @@ PHP_MINFO_FUNCTION(wjctest)
 const zend_function_entry wjctest_functions[] = {
 	PHP_FE(wjctest, NULL)
 	PHP_FE(default_value, NULL)
-	
+	PHP_FE(get_size, NULL)
 	// #define ZEND_FE(name, arg_info)						ZEND_FENTRY(name, ZEND_FN(name), arg_info, 0)
 	// #define ZEND_FENTRY(zend_name, name, arg_info, flags)	{ #zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_internal_arg_info)-1), flags },
 	// #define ZEND_FN(name) zif_##name
