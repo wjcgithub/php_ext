@@ -66,7 +66,6 @@ PHP_FUNCTION(wjctest)
 	RETURN_STR(strg);
 }
 
-//传递参数与返回值
 PHP_FUNCTION(default_value)
 {
 	zend_string *type;
@@ -100,7 +99,6 @@ PHP_FUNCTION(default_value)
 	RETURN_NULL();
 }
 
-//PHP7扩展开发之类型处理
 PHP_FUNCTION(get_size)
 {
 	zval *val;
@@ -125,7 +123,6 @@ PHP_FUNCTION(get_size)
 	RETURN_STR(result);
 }
 
-//PHP7扩展开发之创建变量
 PHP_FUNCTION(define_var)
 {
 	//变量的值
@@ -175,6 +172,30 @@ PHP_FUNCTION(define_var)
 	ZVAL_NULL(&var_value);
 }
 
+//字符串链接
+PHP_FUNCTION(str_concat)
+{
+	zend_string *prefix, *subject, *result;
+	zval *string;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz", &prefix, &string) == FAILURE)
+	{
+		return;
+	}
+
+	subject = zval_get_string(string);
+	if (zend_binary_strncmp(ZSTR_VAL(prefix), ZSTR_LEN(prefix), ZSTR_VAL(subject),ZSTR_LEN(subject),ZSTR_LEN(prefix)) == 0)
+	{
+		RETURN_STR(subject);
+	}
+	result = strpprintf(0, "%s %s", ZSTR_VAL(prefix), ZSTR_VAL(subject));
+	RETURN_STR(result);
+}
+
+PHP_FUNCTION(array_concat)
+{
+	
+}
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and
    unfold functions in source code. See the corresponding marks just before
@@ -260,6 +281,8 @@ const zend_function_entry wjctest_functions[] = {
 	PHP_FE(default_value, NULL)
 	PHP_FE(get_size, NULL)
 	PHP_FE(define_var, NULL)
+	PHP_FE(str_concat, NULL)
+	PHP_FE(array_concat, NULL)
 	// #define ZEND_FE(name, arg_info)						ZEND_FENTRY(name, ZEND_FN(name), arg_info, 0)
 	// #define ZEND_FENTRY(zend_name, name, arg_info, flags)	{ #zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_internal_arg_info)-1), flags },
 	// #define ZEND_FN(name) zif_##name

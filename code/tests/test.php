@@ -51,3 +51,21 @@
 	var_dump($str);
 	var_dump($arr);
 	var_dump($obj);
+
+//PHP7扩展开发之字符串处理
+	echo "PHP7扩展开发之字符串处理\r\n";
+	// function str_concat($prefix, $string)
+	// {
+	// 	$len = strlen($prefix);
+	// 	$substr = substr($string, 0, $len);
+	// 	if ($substr != $prefix) {
+	// 		return $prefix." ".$string;
+	// 	} else {
+	// 		return $string;
+	// 	}
+	// }
+
+	echo str_concat("hello", "world");
+	echo "\n";
+	echo str_concat("hello", "hello wjc");
+	echo "\n";
