@@ -104,3 +104,11 @@
 	var_dump(__ARR__);
 	var_dump(__site__);
 	var_dump(say\__SITE__);
+
+
+//PHP7扩展开发之创建对象
+	echo "PHP7扩展开发之创建对象\r\n";
+	$children = new children();
+	var_dump($children->memory);
+	$children->learn('love');
+	var_dump($children->memory);
