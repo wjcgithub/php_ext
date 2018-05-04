@@ -94,3 +94,13 @@
 	    'a' => 'def',
 	);  
 	var_dump(array_concat($arr, $prefix));
+
+
+//PHP7扩展开发之常量定义
+	echo "PHP7扩展开发之常量定义\r\n";
+	// define("__ARR__", [2, 'site'=>"www.wjc.com"]);
+	// define('__SITE__', 'www.wjc.com');
+	// define("say\__SITE__", "wjc.com");
+	var_dump(__ARR__);
+	var_dump(__site__);
+	var_dump(say\__SITE__);
