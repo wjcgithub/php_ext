@@ -69,3 +69,28 @@
 	echo "\n";
 	echo str_concat("hello", "hello wjc");
 	echo "\n";
+
+//PHP7扩展开发之数组处理
+	echo "PHP7扩展开发之数组处理\r\n";
+	// function array_concat($arr, $prefix)
+	// {
+	// 	foreach ($arr as $key => $value) {
+	// 		if (isset($prefix[$key]) && is_string($value) && is_string($prefix[$key])) {
+	// 			$arr[$key] = $prefix[$key].$value;
+	// 		}
+	// 	}
+
+	// 	return $arr;
+	// }
+
+		 
+	$arr = array(
+	    0 => '0',
+	    1 => '123',
+	    'a' => 'abc',
+	);  
+	$prefix = array(
+	    1 => '456',
+	    'a' => 'def',
+	);  
+	var_dump(array_concat($arr, $prefix));
