@@ -271,6 +271,19 @@ static void wjctest_entry_dtor_persisten(zval *zvalue)
 	}
 }
 
+//PHP7扩展开发之类的创建
+zend_class_entry *children_ce;
+PHP_METHOD(children, learn);
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_children_learn, 0, 0, 1)
+	ZEND_ARG_INFO(0, love)
+ZEND_END_ARG_INFO()
+
+const zend_function_entry children_methods[] = {
+	PHP_ME(children, learn, arginfo_children_learn, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
+
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and
    unfold functions in source code. See the corresponding marks just before
@@ -297,6 +310,7 @@ PHP_MINIT_FUNCTION(wjctest)
 	/* If you have INI entries, uncomment these lines
 	REGISTER_INI_ENTRIES();
 	*/
+	//PHP7扩展开发之常量的创建
 	zend_constant c;
 	zend_string *key;
 	zval value;
@@ -314,8 +328,32 @@ PHP_MINIT_FUNCTION(wjctest)
 
 	REGISTER_STRINGL_CONSTANT("__SITE__", "www.wjc.com", 11, CONST_PERSISTENT);
 	REGISTER_NS_STRINGL_CONSTANT("say", "__SITE__", "wjc.com", 7, CONST_CS|CONST_PERSISTENT);
+
+
+	//PHP7扩展开发之类的创建
+	zend_class_entry ce;
+	INIT_CLASS_ENTRY(ce, "children", children_methods);
+
+	children_ce = zend_register_internal_class(&ce);
+
+	zend_declare_property_null(children_ce, "memory", sizeof("memory")-1, ZEND_ACC_PUBLIC);
+
 	return SUCCESS;
 }
+
+
+PHP_METHOD(children, learn)
+{
+	char *love;
+	size_t love_len;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS(), "s", &love, &love_len) == FAILURE ){
+		return;
+	}
+
+	zend_update_property_string(children_ce, getThis(), "memory", sizeof("memory")-1, love);
+}
+
 /* }}} */
 
 /* {{{ PHP_MSHUTDOWN_FUNCTION
