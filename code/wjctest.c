@@ -233,6 +233,44 @@ PHP_FUNCTION(array_concat)
 		}
 	}ZEND_HASH_FOREACH_END();
 }
+
+//释放hash
+static void wjctest_hash_destroy(HashTable *ht)
+{
+	zend_string *key;
+	zval *element;
+	if ( (ht)->u.flags & HASH_FLAG_INITIALIZED )
+	{
+		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, element) {
+			if (key)
+			{
+				free(key);
+			}
+			switch(Z_TYPE_P(element)) {
+				case IS_STRING:
+					free(Z_PTR_P(element));
+					break;
+				case IS_ARRAY:
+					wjctest_hash_destroy(Z_ARRVAL_P(element));
+					break;
+			}
+		} ZEND_HASH_FOREACH_END();
+		free(HT_GET_DATA_ADDR(ht));
+	}
+	free(ht);
+}
+
+//释放数组和字符串
+static void wjctest_entry_dtor_persisten(zval *zvalue)
+{
+	if (Z_TYPE_P(zvalue) == IS_ARRAY)
+	{
+		wjctest_hash_destroy(Z_ARRVAL_P(zvalue));
+	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
+		zend_string_release(Z_STR_P(zvalue));
+	}
+}
+
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and
    unfold functions in source code. See the corresponding marks just before
@@ -259,6 +297,23 @@ PHP_MINIT_FUNCTION(wjctest)
 	/* If you have INI entries, uncomment these lines
 	REGISTER_INI_ENTRIES();
 	*/
+	zend_constant c;
+	zend_string *key;
+	zval value;
+	ZVAL_NEW_PERSISTENT_ARR(&c.value);
+	zend_hash_init(Z_ARRVAL(c.value), 0, NULL,
+		(dtor_func_t)wjctest_entry_dtor_persisten, 1);
+	add_index_long(&c.value, 0, 2);
+	key = zend_string_init("site", 4, 1);
+	ZVAL_STR(&value, zend_string_init("www.wjc.com", 12, 1));
+	zend_hash_update(Z_ARRVAL(c.value), key, &value);
+	c.flags = CONST_CS|CONST_PERSISTENT;
+	c.name = zend_string_init("__ARR__", 7, 1);
+	c.module_number = module_number;
+	zend_register_constant(&c);
+
+	REGISTER_STRINGL_CONSTANT("__SITE__", "www.wjc.com", 11, CONST_PERSISTENT);
+	REGISTER_NS_STRINGL_CONSTANT("say", "__SITE__", "wjc.com", 7, CONST_CS|CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -270,6 +325,10 @@ PHP_MSHUTDOWN_FUNCTION(wjctest)
 	/* uncomment this line if you have INI entries
 	UNREGISTER_INI_ENTRIES();
 	*/
+	zval *val;
+	val = zend_get_constant_str("__ARR__", 7);
+	wjctest_hash_destroy(Z_ARRVAL_P(val));
+	ZVAL_NULL(val);
 	return SUCCESS;
 }
 /* }}} */
