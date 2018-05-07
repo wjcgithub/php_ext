@@ -1,0 +1,8 @@
+uselib.lo: /usr/local/src/php-7.1.0/ext/uselib/uselib.c
+	$(LIBTOOL) --mode=compile $(CC) -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -I. -I/usr/local/src/php-7.1.0/ext/uselib $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /usr/local/src/php-7.1.0/ext/uselib/uselib.c -o uselib.lo 
+$(phplibdir)/uselib.la: ./uselib.la
+	$(LIBTOOL) --mode=install cp ./uselib.la $(phplibdir)
+
+./uselib.la: $(shared_objects_uselib) $(USELIB_SHARED_DEPENDENCIES)
+	$(LIBTOOL) --mode=link $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@ -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $(shared_objects_uselib) $(USELIB_SHARED_LIBADD)
+
