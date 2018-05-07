@@ -26,6 +26,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_wjctest.h"
+#include <ext/standard/php_filestat.h>
 
 /* If you declare any globals in php_wjctest.h uncomment this:*/
 ZEND_DECLARE_MODULE_GLOBALS(wjctest)
@@ -328,6 +329,69 @@ PHP_FUNCTION(show_ini)
 	RETURN_ZVAL(&arr, 0, 1);
 }
 
+void list_dir(const char *dir);
+PHP_FUNCTION(list_dir)
+{
+	char *dir;
+	size_t dir_len;
+
+#ifndef FAST_ZPP
+	// Get function parameters and do error error-checking
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &dir, &&dir_len) == FAILURE)
+	{
+		return;
+	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+	Z_PARAM_PATH(dir, dir_len)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
+	php_stat(dir, (php_stat_len) dir_len, FS_IS_DIR, return_value );
+
+	if (Z_TYPE_P(return_value) == IS_FALSE)
+	{
+		RETURN_NULL();
+	}
+
+	list_dir(dir);
+
+	RETURN_NULL();
+}
+
+void list_dir(const char *dir)
+{
+	php_stream *stream;
+	int options = REPORT_ERRORS;
+	php_stream_dirent entry;
+	int path_len;
+	char path[MAXPATHLEN];
+	zend_stat_t st;
+
+	stream = php_stream_opendir(dir, options, NULL);
+	if (!stream)
+	{
+		return;
+	}
+
+	while(php_stream_readdir(stream, &entry)){
+		if ((path_len = snprintf(path, sizeof(path), "%s/%s", dir, entry.d_name)) < 0)
+		{
+			break;
+		}
+
+		if (zend_stat(path, &st) != -1 && S_ISDIR(st.st_mode) && strcmp(entry.d_name, ".") != 0 && strcmp(entry.d_name, "..") != 0)
+		{
+			list_dir(path);
+		} else if(strcmp(entry.d_name, ".") != 0 && strcmp(entry.d_name, "..") != 0) {
+			// PUTS(path);
+			// PUTS("\n");
+		}
+	}
+
+	php_stream_closedir(stream);
+}
+
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and
    unfold functions in source code. See the corresponding marks just before
@@ -463,6 +527,7 @@ const zend_function_entry wjctest_functions[] = {
 	PHP_FE(array_concat, NULL)
 	PHP_FE(call_function, NULL)
 	PHP_FE(show_ini, NULL)
+	PHP_FE(list_dir, NULL)
 	// #define ZEND_FE(name, arg_info)						ZEND_FENTRY(name, ZEND_FN(name), arg_info, 0)
 	// #define ZEND_FENTRY(zend_name, name, arg_info, flags)	{ #zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_internal_arg_info)-1), flags },
 	// #define ZEND_FN(name) zif_##name
