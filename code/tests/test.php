@@ -141,3 +141,44 @@
 	echo "php7扩展开发之配置项\r\n";
 	$ini = show_ini();
 	print_r($ini);
+
+//php7扩展开发之流操作
+	echo "php7扩展开发之流操作\r\n";
+	function php_list_dir($dir)
+	{
+		if (is_dir($dir) === false) {
+			return;
+		}
+
+		$dh = opendir($dir);
+		if ($dh == false) {
+			return;
+		}
+
+		while ( ( $file = readdir($dh) ) !== false ) {
+			if (is_dir($dir."/".$file)  && $file != '.' && $file != '..') {
+				list_dir($dir.'/'.$file);
+			} else if ($file != '.' && $file != '..') {
+				// echo $dir.'/'.$file."\n";
+			}
+		}
+
+		closedir($dh);
+	}
+
+	$start = time();
+	$m = 10000;
+	while ($m) {
+		php_list_dir("/home/c");
+		$m--;	
+	}
+	$end = time();
+	$m = 10000;
+	$start1 = time();
+	while ($m) {
+		list_dir("/home/c");
+		$m--;	
+	}
+	$end1 = time();
+	echo "ext func run time: ".($end1-$start1)."<br>";
+	echo "custom func run time: ".($end-$start);
