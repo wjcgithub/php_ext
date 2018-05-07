@@ -136,3 +136,8 @@
 	$demo = new FuncCall();
 	echo call_function($demo, "get_site_name", "site name:");
 	echo call_function(null, "get_site_url", "site url:");
+
+//php7扩展开发之配置项
+	echo "php7扩展开发之配置项\r\n";
+	$ini = show_ini();
+	print_r($ini);
