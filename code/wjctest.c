@@ -27,21 +27,21 @@
 #include "ext/standard/info.h"
 #include "php_wjctest.h"
 
-/* If you declare any globals in php_wjctest.h uncomment this:
+/* If you declare any globals in php_wjctest.h uncomment this:*/
 ZEND_DECLARE_MODULE_GLOBALS(wjctest)
-*/
+
 
 /* True global resources - no need for thread safety here */
 static int le_wjctest;
 
 /* {{{ PHP_INI
  */
-/* Remove comments and fill if you need to have entries in php.ini
+/* Remove comments and fill if you need to have entries in php.ini*/
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("wjctest.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_wjctest_globals, wjctest_globals)
-    STD_PHP_INI_ENTRY("wjctest.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_wjctest_globals, wjctest_globals)
+    STD_PHP_INI_ENTRY("wjctest.number", "100", PHP_INI_ALL, OnUpdateLong, global_number, zend_wjctest_globals, wjctest_globals)
+    STD_PHP_INI_ENTRY("wjctest.string", "ab", PHP_INI_ALL, OnUpdateString, global_string, zend_wjctest_globals, wjctest_globals)
+    STD_PHP_INI_ENTRY("wjctest.boolean", "0", PHP_INI_ALL, OnUpdateBool, global_boolean, zend_wjctest_globals, wjctest_globals)
 PHP_INI_END()
-*/
 /* }}} */
 
 /* Remove the following function when you have successfully modified config.m4
@@ -317,6 +317,17 @@ PHP_FUNCTION(call_function)
     	RETURN_ZVAL(&retval, 0, 1);
 }
 
+//php7扩展开发之配置项
+PHP_FUNCTION(show_ini)
+{
+	zval arr;
+	array_init(&arr);
+	add_assoc_long_ex(&arr, "wjctest.number", 14, WJCTEST_G(global_number));
+	add_assoc_string_ex(&arr, "wjctest.string", 14, WJCTEST_G(global_string));
+	add_assoc_bool_ex(&arr, "wjctest.boolean", 15, WJCTEST_G(global_boolean));
+	RETURN_ZVAL(&arr, 0, 1);
+}
+
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and
    unfold functions in source code. See the corresponding marks just before
@@ -340,9 +351,9 @@ static void php_wjctest_init_globals(zend_wjctest_globals *wjctest_globals)
  */
 PHP_MINIT_FUNCTION(wjctest)
 {
-	/* If you have INI entries, uncomment these lines
+	/* If you have INI entries, uncomment these lines*/
 	REGISTER_INI_ENTRIES();
-	*/
+	
 	//PHP7扩展开发之常量的创建
 	zend_constant c;
 	zend_string *key;
@@ -451,6 +462,7 @@ const zend_function_entry wjctest_functions[] = {
 	PHP_FE(str_concat, NULL)
 	PHP_FE(array_concat, NULL)
 	PHP_FE(call_function, NULL)
+	PHP_FE(show_ini, NULL)
 	// #define ZEND_FE(name, arg_info)						ZEND_FENTRY(name, ZEND_FN(name), arg_info, 0)
 	// #define ZEND_FENTRY(zend_name, name, arg_info, flags)	{ #zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_internal_arg_info)-1), flags },
 	// #define ZEND_FN(name) zif_##name
