@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include "hello.h"
 #include "wt.h"
+#include "staticlib.h"
 
 /* If you declare any globals in php_uselib.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(uselib)
@@ -140,6 +141,17 @@ PHP_FUNCTION(custom_show_site)
 	free(site);
 	return;
 }
+
+PHP_FUNCTION(print_static_show)
+{
+	zend_string *strg;
+	char *str = static_show();
+	size_t zval_len = sizeof(zval);
+	size_t zend_value_len = sizeof(zend_value);
+	strg = strpprintf(0,"result: %s, zval_len: %d, zend_value_len: %d", str, zval_len, zend_value_len);
+	free(str);
+	RETURN_STR(strg);
+}
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and
    unfold functions in source code. See the corresponding marks just before
@@ -233,6 +245,7 @@ PHP_MINFO_FUNCTION(uselib)
 const zend_function_entry uselib_functions[] = {
 	PHP_FE(confirm_uselib_compiled,	NULL)		/* For testing, remove later. */
 	PHP_FE(custom_show_site, NULL)
+	PHP_FE(print_static_show, NULL)
 	PHP_FE_END	/* Must be the last line in uselib_functions[] */
 };
 /* }}} */

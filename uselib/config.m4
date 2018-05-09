@@ -49,7 +49,7 @@ if test "$PHP_USELIB" != "no"; then
 
   dnl PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
   dnl [
-  dnl   PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $USELIB_DIR/$PHP_LIBDIR, USELIB_SHARED_LIBADD)
+  dnl PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $USELIB_DIR/$PHP_LIBDIR, USELIB_SHARED_LIBADD)
   dnl   AC_DEFINE(HAVE_USELIBLIB,1,[ ])
   dnl ],[
   dnl   AC_MSG_ERROR([wrong uselib lib version or lib not found])
@@ -59,5 +59,12 @@ if test "$PHP_USELIB" != "no"; then
   dnl
   dnl PHP_SUBST(USELIB_SHARED_LIBADD)
 
+  PHP_ADD_LIBRARY_WITH_PATH(hello, /usr/local/lib, SAY_SHARED_LIBADD)
+  PHP_SUBST(SAY_SHARED_LIBADD)
+
+  PHP_ADD_LIBRARY_WITH_PATH(wt, /usr/local/lib, WT_SHARED_LIBADD)
+  PHP_SUBST(WT_SHARED_LIBADD)
+
   PHP_NEW_EXTENSION(uselib, uselib.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_INSTALL_HEADERS(ext/uselib, [php_uselib.h])
 fi
