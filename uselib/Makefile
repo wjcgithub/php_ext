@@ -11,6 +11,8 @@ SHLIB_DL_SUFFIX_NAME = so
 ZEND_EXT_TYPE = zend_extension
 RE2C = re2c
 AWK = gawk
+SAY_SHARED_LIBADD = -Wl,-rpath,/usr/local/lib -L/usr/local/lib -lhello
+WT_SHARED_LIBADD = -Wl,-rpath,/usr/local/lib -L/usr/local/lib -lwt
 shared_objects_uselib = uselib.lo
 PHP_PECL_EXTENSION = uselib
 PHP_MODULES = $(phplibdir)/uselib.la
@@ -41,7 +43,7 @@ LDFLAGS =
 SHARED_LIBTOOL =
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 SHELL = /bin/bash
-INSTALL_HEADERS =
+INSTALL_HEADERS = ext/uselib/php_uselib.h
 mkinstalldirs = $(top_srcdir)/build/shtool mkdir -p
 INSTALL = $(top_srcdir)/build/shtool install -c
 INSTALL_DATA = $(INSTALL) -m 644
@@ -195,5 +197,5 @@ $(phplibdir)/uselib.la: ./uselib.la
 	$(LIBTOOL) --mode=install cp ./uselib.la $(phplibdir)
 
 ./uselib.la: $(shared_objects_uselib) $(USELIB_SHARED_DEPENDENCIES)
-	$(LIBTOOL) --mode=link $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@ -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $(shared_objects_uselib) $(USELIB_SHARED_LIBADD)
+	$(LIBTOOL) --mode=link $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@ -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $(shared_objects_uselib) $(USELIB_SHARED_LIBADD) $(SAY_SHARED_LIBADD) $(WT_SHARED_LIBADD)
 
