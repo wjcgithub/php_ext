@@ -26,6 +26,9 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_uselib.h"
+#include <stdio.h>
+#include "hello.h"
+#include "wt.h"
 
 /* If you declare any globals in php_uselib.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(uselib)
@@ -33,6 +36,70 @@ ZEND_DECLARE_MODULE_GLOBALS(uselib)
 
 /* True global resources - no need for thread safety here */
 static int le_uselib;
+
+zend_class_entry *uselib_ce;
+zend_object_handlers uselib_object_handlers;
+typedef struct _uselib_object
+{
+	char * uselib_ptr;
+	zend_object std;
+} uselib_object;
+
+//用于从标准的zend_object转换获取uselib_object地址
+static inline uselib_object *uselib_fetch_object(zend_object *obj) /* {{{ */ {
+        return (uselib_object *)((char*)(obj) - XtOffsetOf(uselib_object, std));
+}
+
+//创建类对象
+static zend_object * uselib_object_create(zend_class_entry * type TSRMLS_DC)
+{
+	uselib_object *obj = (uselib_object *)ecalloc(1, sizeof(uselib_object) + zend_object_properties_size(type));
+	zend_object_std_init(&obj->std, type);
+	object_properties_init(&obj->std, type);
+	obj->std.handlers = &uselib_object_handlers;
+	return &obj->std;
+}
+
+//用户销毁类对象
+void uselib_object_free_storage(zend_object *object)
+{
+	uselib_object *intern = uselib_fetch_object(object);
+	zend_object_std_dtor(&intern->std);
+}
+
+//声明类都有哪些方法
+PHP_METHOD(uselib, __construct);
+PHP_METHOD(uselib, __destruct);
+PHP_METHOD(uselib, get);
+const zend_function_entry uselib_methods[] = {
+            PHP_ME(uselib, __construct, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
+            PHP_ME(uselib, __destruct, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_DTOR)
+            PHP_ME(uselib, get, NULL, ZEND_ACC_PUBLIC)
+            {NULL, NULL, NULL}  /* Must be the last line in hello_methods[] */
+};
+
+PHP_METHOD(uselib, __construct)
+{
+	zval *self = getThis();
+	uselib_object *obj = uselib_fetch_object(Z_OBJ_P((self)));
+	obj->uselib_ptr = show_site();
+	RETURN_TRUE;
+}
+
+PHP_METHOD(uselib, __destruct)
+{
+	zval *self = getThis();
+	uselib_object *obj = uselib_fetch_object(Z_OBJ_P((self)));
+	free(obj->uselib_ptr);
+	RETURN_TRUE;
+}
+
+PHP_METHOD(uselib, get)
+{
+	zval *self = getThis();
+	uselib_object *obj = uselib_fetch_object(Z_OBJ_P((self)));
+	RETURN_STRING(obj->uselib_ptr);
+}
 
 /* {{{ PHP_INI
  */
@@ -65,6 +132,14 @@ PHP_FUNCTION(confirm_uselib_compiled)
 
 	RETURN_STR(strg);
 }
+
+PHP_FUNCTION(custom_show_site)
+{
+	char *site = show_site();
+	RETVAL_STRING(site);
+	free(site);
+	return;
+}
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and
    unfold functions in source code. See the corresponding marks just before
@@ -91,6 +166,16 @@ PHP_MINIT_FUNCTION(uselib)
 	/* If you have INI entries, uncomment these lines
 	REGISTER_INI_ENTRIES();
 	*/
+
+	//把声明和定义的函数结合起来
+	zend_class_entry ce;
+	INIT_CLASS_ENTRY(ce, "uselib", uselib_methods);
+	uselib_ce = zend_register_internal_class(&ce);
+	uselib_ce->create_object = uselib_object_create;
+	memcpy(&uselib_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	uselib_object_handlers.clone_obj = NULL;
+	uselib_object_handlers.offset = XtOffsetOf(uselib_object, std);
+	uselib_object_handlers.free_obj = uselib_object_free_storage;
 	return SUCCESS;
 }
 /* }}} */
@@ -147,6 +232,7 @@ PHP_MINFO_FUNCTION(uselib)
  */
 const zend_function_entry uselib_functions[] = {
 	PHP_FE(confirm_uselib_compiled,	NULL)		/* For testing, remove later. */
+	PHP_FE(custom_show_site, NULL)
 	PHP_FE_END	/* Must be the last line in uselib_functions[] */
 };
 /* }}} */
